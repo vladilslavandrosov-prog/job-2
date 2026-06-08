@@ -1,13 +1,7 @@
 import { build } from "vite";
 import esbuild from "esbuild";
 
-await build({
-  root: "client",
-  build: {
-    outDir: "../dist/public",
-    emptyOutDir: true,
-  },
-});
+await build();
 
 await esbuild.build({
   entryPoints: ["server/index.ts"],

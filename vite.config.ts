@@ -1,18 +1,21 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import path from "path";
+import { resolve } from "path";
+import { fileURLToPath } from "url";
+
+const root = fileURLToPath(new URL(".", import.meta.url));
 
 export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      "@": path.resolve(process.cwd(), "client/src"),
-      "@shared": path.resolve(process.cwd(), "shared"),
+      "@": resolve(root, "client/src"),
+      "@shared": resolve(root, "shared"),
     },
   },
-  root: "client",
+  root: resolve(root, "client"),
   build: {
-    outDir: "../dist/public",
+    outDir: resolve(root, "dist/public"),
     emptyOutDir: true,
   },
   server: {
