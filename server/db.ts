@@ -4,9 +4,13 @@ import * as schema from "../shared/schema.js";
 
 const { Pool } = pg;
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-});
+const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL;
+
+if (!connectionString) {
+  throw new Error("DATABASE_URL or POSTGRES_URL must be set");
+}
+
+const pool = new Pool({ connectionString });
 
 export const db = drizzle(pool, { schema });
 export { pool };
