@@ -8,6 +8,6 @@ build:
   artifacts:
     "*": /
 run:
-  scriptName: start
+  scriptName: dist/index.js
   persistenceMount: /data
   containerPort: 5000
