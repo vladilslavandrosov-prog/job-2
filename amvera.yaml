@@ -1,9 +1,13 @@
 meta:
-  toolchain: {}
+  environment: nodejs
+  toolchain:
+    name: npm
+    version: "20"
 build:
-  buildDir: .
-  buildCommand: npm install && npm run build
+  additionalCommands: npm run build
+  artifacts:
+    "*": /
 run:
+  scriptName: start
   persistenceMount: /data
   containerPort: 5000
-  command: npm start
