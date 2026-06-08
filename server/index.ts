@@ -1,4 +1,4 @@
-import express from "express";
+import express, { type Request, type Response, type NextFunction } from "express";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
 import { pool } from "./db.js";
@@ -37,6 +37,12 @@ app.use(passport.session());
 
 registerRoutes(app);
 
+// JSON error handler — must be before static serving
+app.use("/api", (err: any, _req: Request, res: Response, _next: NextFunction) => {
+  console.error(err);
+  res.status(err.status || 500).json({ error: err.message || "Internal server error" });
+});
+
 if (isDev) {
   const { setupVite } = await import("./vite.js");
   await setupVite(app);
@@ -45,6 +51,15 @@ if (isDev) {
   serveStatic(app);
 }
 
+// Global error handler
+app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+  console.error(err);
+  res.status(err.status || 500).json({ error: err.message || "Internal server error" });
+});
+
 app.listen(PORT, () => {
   console.log(`TenderAI server running on port ${PORT} [${isDev ? "dev" : "prod"}]`);
+  if (!process.env.DATABASE_URL) {
+    console.warn("WARNING: DATABASE_URL is not set!");
+  }
 });
