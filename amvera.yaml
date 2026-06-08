@@ -1,9 +1,5 @@
----
 meta:
-  environment: nodejs
-  toolchain:
-    name: node
-    version: "20"
+  toolchain: {}
 build:
   buildDir: .
   buildCommand: npm install && npm run build
