@@ -50,6 +50,7 @@ function proColor(v: number) {
 
 export default function CompetenciesPage() {
   const qc = useQueryClient();
+  const [activeDir, setActiveDir] = useState<string | null>(null);
 
   const { data: profile = [], isLoading } = useQuery<CompetencyItem[]>({
     queryKey: ["/api/competencies/profile"],
@@ -139,7 +140,28 @@ export default function CompetenciesPage() {
           </button>
         </header>
 
-        {/* Competencies list — all directions grouped */}
+        {/* Direction chip filter */}
+        <div className="px-4 md:px-6 py-3 flex flex-wrap gap-2 shrink-0" style={{ borderBottom: "1px solid var(--border)" }}>
+          {[null, ...DIRECTIONS].map((dir) => {
+            const active = activeDir === dir;
+            return (
+              <button
+                key={dir ?? "__all__"}
+                onClick={() => setActiveDir(dir)}
+                className="px-3 py-1 rounded-full text-xs font-medium transition-all"
+                style={
+                  active
+                    ? { background: "var(--primary)", color: "#fff" }
+                    : { background: "var(--bg-card)", color: "var(--text-muted)", border: "1px solid var(--border)" }
+                }
+              >
+                {dir ?? "Все"}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Competencies list */}
         <div className="flex-1 overflow-y-auto p-4 md:p-6 pb-24 md:pb-6">
           {isLoading ? (
             <div className="flex items-center justify-center h-32" style={{ color: "var(--text-muted)" }}>
@@ -147,7 +169,7 @@ export default function CompetenciesPage() {
             </div>
           ) : (
             <div className="space-y-6 max-w-2xl">
-              {DIRECTIONS.map((dir) => (
+              {DIRECTIONS.filter((d) => activeDir === null || d === activeDir).map((dir) => (
                 <div key={dir}>
                   <div className="flex items-center justify-between mb-3">
                     <h2 className="text-sm font-semibold" style={{ color: "var(--text)" }}>{dir}</h2>
