@@ -16,7 +16,6 @@ interface TenderDetailProps {
 
 export function TenderDetail({ tender, isSaved, onClose, onSave }: TenderDetailProps) {
   const [adjustedScore, setAdjustedScore] = useState<number | null>(null);
-  const displayScore = adjustedScore ?? tender.aiScore;
   return (
     <div className="flex flex-col h-full" style={{ background: "var(--bg)" }}>
       <div

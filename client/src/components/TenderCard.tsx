@@ -51,7 +51,7 @@ export function TenderCard({ tender, isSelected, isSaved, onClick, onSave }: Ten
           {tender.aiScore != null && (
             <div className="text-center">
               <div className={cn("text-lg font-bold", getScoreColor(tender.aiScore))}>{tender.aiScore}</div>
-              <div className="text-[10px]" style={{ color: "var(--text-muted)" }}>AI Score</div>
+              <div className="text-[10px]" style={{ color: "var(--text-muted)" }}>Оценка</div>
             </div>
           )}
           <button

@@ -35,8 +35,8 @@ function computeMatch(required: TenderCompetencyItem[], ours: CompetencyItem[]) 
   return { expPct, profPct, avg };
 }
 
-export function computeAdjustedScore(aiScore: number, matchAvg: number) {
-  return Math.round(aiScore * 0.55 + matchAvg * 0.45);
+export function computeAdjustedScore(_aiScore: number, matchAvg: number) {
+  return matchAvg;
 }
 
 export function CompetencyPanel({ tenderId, aiScore, onScoreComputed }: Props) {
