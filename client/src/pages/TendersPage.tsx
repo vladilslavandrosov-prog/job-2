@@ -14,6 +14,14 @@ import type { Tender } from "@shared/schema";
 const CATEGORIES = Object.keys(CATEGORY_LABELS);
 const PLATFORMS = ["all", "zakupki.gov.ru", "sberbank-ast.ru", "roseltorg.ru"];
 
+async function fetchJSON<T>(url: string): Promise<T> {
+  const r = await fetch(url, { credentials: "include" });
+  const data = await r.json();
+  if (!r.ok) throw new Error(data?.error || "Request failed");
+  if (!Array.isArray(data)) throw new Error("Expected array response");
+  return data as T;
+}
+
 export default function TendersPage() {
   const { user } = useAuth();
   const qc = useQueryClient();
@@ -29,23 +37,27 @@ export default function TendersPage() {
       if (search) p.set("search", search);
       if (category !== "all") p.set("category", category);
       if (platform !== "all") p.set("platform", platform);
-      return fetch(`/api/tenders?${p}`, { credentials: "include" }).then((r) => r.json());
+      return fetchJSON<Tender[]>(`/api/tenders?${p}`);
     },
+    retry: false,
   });
 
   const { data: saved = [] } = useQuery<Tender[]>({
     queryKey: ["/api/saved"],
-    queryFn: () => fetch("/api/saved", { credentials: "include" }).then((r) => r.json()),
+    queryFn: () => fetchJSON<Tender[]>("/api/saved"),
     enabled: !!user,
+    retry: false,
   });
 
-  const savedIds = new Set(saved.map((t) => t.id));
+  const savedIds = new Set((Array.isArray(saved) ? saved : []).map((t) => t.id));
 
   const toggleSave = useMutation({
     mutationFn: (id: number) => apiRequest("POST", `/api/saved/${id}`),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["/api/saved"] }),
     onError: (e: any) => toast({ variant: "destructive", title: "Ошибка", description: e.message }),
   });
+
+  const tenderList = Array.isArray(tenders) ? tenders : [];
 
   return (
     <div className="flex h-screen bg-[#0B0B0F] overflow-hidden">
@@ -61,7 +73,7 @@ export default function TendersPage() {
               className="pl-9"
             />
           </div>
-          <span className="text-sm text-[#6B7280]">{tenders.length} тендеров</span>
+          <span className="text-sm text-[#6B7280]">{tenderList.length} тендеров</span>
         </header>
 
         <div className="flex flex-1 overflow-hidden">
@@ -102,10 +114,10 @@ export default function TendersPage() {
                 <div className="flex items-center justify-center h-32 text-[#6B7280]">
                   <RefreshCw size={18} className="animate-spin mr-2" /> Загрузка...
                 </div>
-              ) : tenders.length === 0 ? (
+              ) : tenderList.length === 0 ? (
                 <div className="flex items-center justify-center h-32 text-[#6B7280] text-sm">Тендеры не найдены</div>
               ) : (
-                tenders.map((tender) => (
+                tenderList.map((tender) => (
                   <TenderCard
                     key={tender.id}
                     tender={tender}
@@ -133,7 +145,7 @@ export default function TendersPage() {
                   <Filter size={28} className="text-[#6366F1]" />
                 </div>
                 <h3 className="text-lg font-medium text-[#F9FAFB] mb-2">Выберите тендер</h3>
-                <p className="text-sm text-[#6B7280] max-w-xs">Нажмите на любой тендер из списка, чтобы просмотреть подробную информацию</p>
+                <p className="text-sm text-[#6B7280] max-w-xs">Нажмите на любой тендер из списка</p>
               </div>
             )}
           </div>
