@@ -5,6 +5,7 @@ import { AuthProvider } from "./lib/auth";
 import AuthPage from "./pages/AuthPage";
 import TendersPage from "./pages/TendersPage";
 import BillingPage from "./pages/BillingPage";
+import CompetenciesPage from "./pages/CompetenciesPage";
 import NotFound from "./pages/NotFound";
 import { Toaster } from "./components/ui/toaster";
 
@@ -15,6 +16,7 @@ export default function App() {
         <Switch>
           <Route path="/auth" component={AuthPage} />
           <Route path="/billing" component={BillingPage} />
+          <Route path="/competencies" component={CompetenciesPage} />
           <Route path="/" component={TendersPage} />
           <Route component={NotFound} />
         </Switch>

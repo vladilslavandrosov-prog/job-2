@@ -1,11 +1,12 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, CreditCard, LogOut, Zap, TrendingUp, Shield, Sun, Moon } from "lucide-react";
+import { LayoutDashboard, CreditCard, LogOut, Zap, TrendingUp, Shield, Sun, Moon, BadgeCheck } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useTheme } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
 const nav = [
   { href: "/", label: "Тендеры", icon: LayoutDashboard },
+  { href: "/competencies", label: "Наши компетенции", icon: BadgeCheck },
   { href: "/billing", label: "Тарифы", icon: CreditCard },
 ];
 
