@@ -12,6 +12,9 @@ import {
   unsaveTender,
   isTenderSaved,
   updateUserPlan,
+  getCompetencyProfile,
+  upsertCompetencyProfile,
+  getTenderCompetencies,
 } from "./storage.js";
 import { registerSchema } from "../shared/schema.js";
 
@@ -114,6 +117,37 @@ export function registerRoutes(app: Express) {
       const user = await updateUserPlan((req.user as any).id, plan);
       const { password: _, ...safe } = user;
       res.json(safe);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // Competency profile
+  app.get("/api/competencies/profile", requireAuth, async (req, res) => {
+    try {
+      const profile = await getCompetencyProfile((req.user as any).id);
+      res.json(profile?.competencies ?? []);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.put("/api/competencies/profile", requireAuth, async (req, res) => {
+    try {
+      const { competencies } = req.body;
+      if (!Array.isArray(competencies)) return res.status(400).json({ error: "competencies must be array" });
+      const profile = await upsertCompetencyProfile((req.user as any).id, competencies);
+      res.json(profile.competencies);
+    } catch (err: any) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  // Tender competencies
+  app.get("/api/tenders/:id/competencies", async (req, res) => {
+    try {
+      const tc = await getTenderCompetencies(Number(req.params.id));
+      res.json(tc?.competencies ?? []);
     } catch (err: any) {
       res.status(500).json({ error: err.message });
     }

@@ -1,5 +1,5 @@
 import { db } from "./db.js";
-import { users, tenders, savedTenders } from "../shared/schema.js";
+import { users, tenders, savedTenders, competencyProfiles, tenderCompetencies } from "../shared/schema.js";
 import { eq, and, desc, ilike, or } from "drizzle-orm";
 import type { InsertUser, InsertTender } from "../shared/schema.js";
 
@@ -97,4 +97,27 @@ export async function isTenderSaved(userId: number, tenderId: number) {
     .from(savedTenders)
     .where(and(eq(savedTenders.userId, userId), eq(savedTenders.tenderId, tenderId)));
   return !!saved;
+}
+
+export async function getCompetencyProfile(userId: number) {
+  const [profile] = await db.select().from(competencyProfiles).where(eq(competencyProfiles.userId, userId));
+  return profile;
+}
+
+export async function upsertCompetencyProfile(userId: number, competencies: any[]) {
+  const existing = await getCompetencyProfile(userId);
+  if (existing) {
+    const [updated] = await db.update(competencyProfiles)
+      .set({ competencies, updatedAt: new Date() })
+      .where(eq(competencyProfiles.userId, userId))
+      .returning();
+    return updated;
+  }
+  const [created] = await db.insert(competencyProfiles).values({ userId, competencies }).returning();
+  return created;
+}
+
+export async function getTenderCompetencies(tenderId: number) {
+  const [tc] = await db.select().from(tenderCompetencies).where(eq(tenderCompetencies.tenderId, tenderId));
+  return tc;
 }

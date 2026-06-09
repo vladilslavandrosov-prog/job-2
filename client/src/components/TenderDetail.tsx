@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { cn, formatDate, getCategoryLabel, getScoreColor, getScoreBg } from "@/lib/utils";
+import { CompetencyPanel } from "@/components/CompetencyPanel";
 import type { Tender } from "@shared/schema";
 
 interface TenderDetailProps {
@@ -100,6 +101,10 @@ export function TenderDetail({ tender, isSaved, onClose, onSave }: TenderDetailP
           </div>
           <Badge variant="default">{getCategoryLabel(tender.category)}</Badge>
         </div>
+
+        <Separator />
+
+        <CompetencyPanel tenderId={tender.id} />
 
         <Separator />
 
