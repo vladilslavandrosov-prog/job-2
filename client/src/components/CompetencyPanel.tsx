@@ -104,11 +104,6 @@ export function CompetencyPanel({ tenderId, aiScore, onScoreComputed }: Props) {
                 style={{ background: `${REQ_COLOR}18`, color: REQ_COLOR }}>
                 Владение {match.profPct}%
               </span>
-              {adjustedScore != null && (
-                <span className="text-xs font-bold" style={{ color: scoreColor }}>
-                  → {adjustedScore}
-                </span>
-              )}
             </div>
           )}
           {!hasRequired && !loadingReq && (

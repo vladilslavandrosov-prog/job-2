@@ -43,23 +43,23 @@ export function TenderDetail({ tender, isSaved, onClose, onSave }: TenderDetailP
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 md:p-5 space-y-4 md:space-y-5 pb-24 md:pb-5">
-        {tender.aiScore != null && (
+        {adjustedScore != null && (
           <div
             className="flex items-center gap-4 p-4 rounded-lg"
             style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}
           >
             <div className="text-center shrink-0">
-              <div className={cn("text-3xl font-bold", getScoreColor(displayScore!))}>{displayScore}</div>
-              <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>AI Score</div>
+              <div className={cn("text-3xl font-bold", getScoreColor(adjustedScore))}>{adjustedScore}</div>
+              <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>Наша оценка</div>
             </div>
             <div className="flex-1">
               <div className="h-2 rounded-full overflow-hidden" style={{ background: "var(--score-bar)" }}>
-                <div className={cn("h-full rounded-full", getScoreBg(displayScore!))} style={{ width: `${displayScore}%` }} />
+                <div className={cn("h-full rounded-full", getScoreBg(adjustedScore))} style={{ width: `${adjustedScore}%` }} />
               </div>
               <p className="text-xs mt-2" style={{ color: "var(--text-muted)" }}>
-                {displayScore! >= 90 ? "Отличное соответствие"
-                  : displayScore! >= 75 ? "Хорошее соответствие"
-                  : displayScore! >= 60 ? "Среднее соответствие"
+                {adjustedScore >= 90 ? "Отличное соответствие"
+                  : adjustedScore >= 75 ? "Хорошее соответствие"
+                  : adjustedScore >= 60 ? "Среднее соответствие"
                   : "Низкое соответствие"}
               </p>
             </div>
