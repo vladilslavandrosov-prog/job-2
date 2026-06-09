@@ -7,7 +7,7 @@ import { registerRoutes } from "./routes.js";
 import { sql } from "drizzle-orm";
 import { users, tenders, competencyProfiles, tenderCompetencies } from "../shared/schema.js";
 import bcrypt from "bcryptjs";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 
 const app = express();
 const PORT = Number(process.env.PORT) || 5000;
@@ -118,9 +118,22 @@ async function runSeed() {
     console.log("Demo competency profile created.");
   }
 
-  // 10 Dev tenders — разные варианты совпадения компетенций
-  const count = await db.select().from(tenders);
-  if (count.length === 0) {
+  // 10 Dev tenders — вставляем если ещё нет по URL
+  const devTenderUrls = [
+    "https://zakupki.gov.ru/tender/100001",
+    "https://sberbank-ast.ru/tender/100002",
+    "https://zakupki.gov.ru/tender/100003",
+    "https://sberbank-ast.ru/tender/100004",
+    "https://roseltorg.ru/tender/100005",
+    "https://zakupki.gov.ru/tender/100006",
+    "https://roseltorg.ru/tender/100007",
+    "https://sberbank-ast.ru/tender/100008",
+    "https://zakupki.gov.ru/tender/100009",
+    "https://sberbank-ast.ru/tender/100010",
+  ];
+
+  const existing10 = await db.select().from(tenders).where(inArray(tenders.url, devTenderUrls));
+  if (existing10.length === 0) {
     const inserted = await db.insert(tenders).values([
       // 1. Идеальное совпадение — Python+React+PostgreSQL+Docker
       { title: "Разработка веб-платформы государственных закупок", description: "Разработка высоконагруженной веб-системы для автоматизации государственных закупок. Требуется опытная команда full-stack разработчиков с глубокими знаниями Python, React и PostgreSQL. Обязательна контейнеризация в Docker.", customer: "Минфин РФ", budget: "15 000 000 ₽", deadline: new Date("2026-09-30"), category: "development", platform: "zakupki.gov.ru", url: "https://zakupki.gov.ru/tender/100001", status: "active", aiScore: 95 },
@@ -229,6 +242,87 @@ async function runSeed() {
       });
     }
     console.log("Sample tenders and competencies seeded.");
+  } else {
+    // Тендеры уже есть — добавить компетенции к тем, у которых их нет
+    const insertedTenders = await db.select().from(tenders).where(inArray(tenders.url, devTenderUrls));
+    const tenderMap = new Map(insertedTenders.map((t) => [t.url, t.id]));
+
+    const competencyDataByUrl: { url: string; competencies: any[] }[] = [
+      { url: "https://zakupki.gov.ru/tender/100001", competencies: [
+        { name: "Python",     direction: "Backend",      experienceLevel: 4, proficiencyLevel: 4, isRequired: true, comment: "Основной язык backend" },
+        { name: "React",      direction: "Frontend",     experienceLevel: 3, proficiencyLevel: 3, isRequired: true },
+        { name: "PostgreSQL", direction: "Базы данных",  experienceLevel: 4, proficiencyLevel: 3, isRequired: true },
+        { name: "Docker",     direction: "DevOps",       experienceLevel: 3, proficiencyLevel: 3, isRequired: true },
+        { name: "REST API",   direction: "Интеграции",   experienceLevel: 4, proficiencyLevel: 3, isRequired: true },
+      ]},
+      { url: "https://sberbank-ast.ru/tender/100002", competencies: [
+        { name: "Node.js",    direction: "Backend",      experienceLevel: 3, proficiencyLevel: 3, isRequired: true },
+        { name: "React",      direction: "Frontend",     experienceLevel: 3, proficiencyLevel: 3, isRequired: true },
+        { name: "TypeScript", direction: "Frontend",     experienceLevel: 3, proficiencyLevel: 3, isRequired: true },
+        { name: "MongoDB",    direction: "Базы данных",  experienceLevel: 3, proficiencyLevel: 3, isRequired: true },
+        { name: "CI/CD",      direction: "DevOps",       experienceLevel: 3, proficiencyLevel: 3, isRequired: true },
+        { name: "Docker",     direction: "DevOps",       experienceLevel: 3, proficiencyLevel: 2, isRequired: false },
+      ]},
+      { url: "https://zakupki.gov.ru/tender/100003", competencies: [
+        { name: "Python",           direction: "Backend", experienceLevel: 4, proficiencyLevel: 4, isRequired: true },
+        { name: "Machine Learning", direction: "AI / ML", experienceLevel: 4, proficiencyLevel: 4, isRequired: true },
+        { name: "NLP",              direction: "AI / ML", experienceLevel: 4, proficiencyLevel: 4, isRequired: true },
+        { name: "PostgreSQL",       direction: "Базы данных", experienceLevel: 3, proficiencyLevel: 3, isRequired: false },
+      ]},
+      { url: "https://sberbank-ast.ru/tender/100004", competencies: [
+        { name: "Java",    direction: "Backend",      experienceLevel: 4, proficiencyLevel: 4, isRequired: true },
+        { name: "Oracle",  direction: "Базы данных",  experienceLevel: 4, proficiencyLevel: 4, isRequired: true },
+        { name: "MS SQL",  direction: "Базы данных",  experienceLevel: 3, proficiencyLevel: 3, isRequired: false },
+        { name: "REST API",direction: "Интеграции",   experienceLevel: 3, proficiencyLevel: 3, isRequired: false },
+      ]},
+      { url: "https://roseltorg.ru/tender/100005", competencies: [
+        { name: "Flutter",   direction: "Мобильная разработка", experienceLevel: 4, proficiencyLevel: 4, isRequired: true },
+        { name: "Android",   direction: "Мобильная разработка", experienceLevel: 4, proficiencyLevel: 4, isRequired: true },
+        { name: "REST API",  direction: "Интеграции",            experienceLevel: 3, proficiencyLevel: 3, isRequired: true },
+        { name: "PostgreSQL",direction: "Базы данных",           experienceLevel: 2, proficiencyLevel: 2, isRequired: false },
+      ]},
+      { url: "https://zakupki.gov.ru/tender/100006", competencies: [
+        { name: "Kubernetes", direction: "DevOps", experienceLevel: 4, proficiencyLevel: 4, isRequired: true },
+        { name: "Docker",     direction: "DevOps", experienceLevel: 4, proficiencyLevel: 4, isRequired: true },
+        { name: "CI/CD",      direction: "DevOps", experienceLevel: 4, proficiencyLevel: 4, isRequired: true },
+        { name: "Python",     direction: "Backend", experienceLevel: 2, proficiencyLevel: 2, isRequired: false },
+      ]},
+      { url: "https://roseltorg.ru/tender/100007", competencies: [
+        { name: "1С",     direction: "Интеграции",   experienceLevel: 5, proficiencyLevel: 5, isRequired: true },
+        { name: "Oracle", direction: "Базы данных",  experienceLevel: 4, proficiencyLevel: 4, isRequired: true },
+        { name: "MS SQL", direction: "Базы данных",  experienceLevel: 3, proficiencyLevel: 3, isRequired: false },
+      ]},
+      { url: "https://sberbank-ast.ru/tender/100008", competencies: [
+        { name: "React",      direction: "Frontend",    experienceLevel: 4, proficiencyLevel: 4, isRequired: true },
+        { name: "TypeScript", direction: "Frontend",    experienceLevel: 4, proficiencyLevel: 3, isRequired: true },
+        { name: "Node.js",    direction: "Backend",     experienceLevel: 3, proficiencyLevel: 3, isRequired: true },
+        { name: "PostgreSQL", direction: "Базы данных", experienceLevel: 3, proficiencyLevel: 3, isRequired: true },
+        { name: "REST API",   direction: "Интеграции",  experienceLevel: 4, proficiencyLevel: 4, isRequired: true },
+        { name: "Docker",     direction: "DevOps",      experienceLevel: 2, proficiencyLevel: 2, isRequired: false },
+      ]},
+      { url: "https://zakupki.gov.ru/tender/100009", competencies: [
+        { name: "Go",         direction: "Backend",     experienceLevel: 4, proficiencyLevel: 4, isRequired: true },
+        { name: "Kubernetes", direction: "DevOps",      experienceLevel: 4, proficiencyLevel: 4, isRequired: true },
+        { name: "PostgreSQL", direction: "Базы данных", experienceLevel: 3, proficiencyLevel: 3, isRequired: true },
+        { name: "Docker",     direction: "DevOps",      experienceLevel: 3, proficiencyLevel: 3, isRequired: false },
+      ]},
+      { url: "https://sberbank-ast.ru/tender/100010", competencies: [
+        { name: "QA (авто)", direction: "Тестирование", experienceLevel: 3, proficiencyLevel: 3, isRequired: true },
+        { name: "Python",    direction: "Backend",       experienceLevel: 3, proficiencyLevel: 3, isRequired: true },
+        { name: "REST API",  direction: "Интеграции",    experienceLevel: 3, proficiencyLevel: 3, isRequired: true },
+        { name: "CI/CD",     direction: "DevOps",        experienceLevel: 3, proficiencyLevel: 3, isRequired: false },
+      ]},
+    ];
+
+    for (const { url, competencies } of competencyDataByUrl) {
+      const tenderId = tenderMap.get(url);
+      if (!tenderId) continue;
+      const [existing] = await db.select().from(tenderCompetencies).where(eq(tenderCompetencies.tenderId, tenderId));
+      if (!existing) {
+        await db.insert(tenderCompetencies).values({ tenderId, competencies });
+      }
+    }
+    console.log("Competencies backfilled for existing dev tenders.");
   }
 }
 
