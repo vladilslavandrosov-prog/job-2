@@ -63,6 +63,8 @@ export function TenderDetail({ tender, isSaved, onClose, onSave }: TenderDetailP
           </div>
         )}
 
+        <CompetencyPanel tenderId={tender.id} aiScore={tender.aiScore} />
+
         <div className="grid grid-cols-2 gap-3">
           <div
             className="p-3 rounded-lg col-span-2 sm:col-span-1"
@@ -101,10 +103,6 @@ export function TenderDetail({ tender, isSaved, onClose, onSave }: TenderDetailP
           </div>
           <Badge variant="default">{getCategoryLabel(tender.category)}</Badge>
         </div>
-
-        <Separator />
-
-        <CompetencyPanel tenderId={tender.id} />
 
         <Separator />
 

@@ -10,6 +10,7 @@ import {
 } from "recharts";
 import type { TenderCompetencyItem, CompetencyItem } from "@shared/schema";
 import { EXPERIENCE_LABELS, PROFICIENCY_LABELS } from "@shared/schema";
+import { REQ_COLOR, OUR_COLOR } from "./CompetencyPanel";
 
 interface Props {
   required: TenderCompetencyItem[];
@@ -97,18 +98,18 @@ export function CompetencyRadar({ required, ours, mode }: Props) {
           <Radar
             name="Требование"
             dataKey="required"
-            stroke="#EF4444"
-            fill="#EF4444"
-            fillOpacity={0.15}
-            dot={{ r: 4, fill: "#EF4444", strokeWidth: 0 }}
+            stroke={REQ_COLOR}
+            fill={REQ_COLOR}
+            fillOpacity={0.12}
+            dot={{ r: 4, fill: REQ_COLOR, strokeWidth: 0 }}
           />
           <Radar
-            name="Наша команда"
+            name="Наш профиль"
             dataKey="ours"
-            stroke="#22C55E"
-            fill="#22C55E"
-            fillOpacity={0.15}
-            dot={{ r: 4, fill: "#22C55E", strokeWidth: 0 }}
+            stroke={OUR_COLOR}
+            fill={OUR_COLOR}
+            fillOpacity={0.12}
+            dot={{ r: 4, fill: OUR_COLOR, strokeWidth: 0 }}
           />
           <Tooltip content={<CustomTooltip />} />
           <Legend
