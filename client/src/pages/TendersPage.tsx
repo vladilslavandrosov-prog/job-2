@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/lib/auth";
 import { apiRequest } from "@/lib/queryClient";
 import { toast } from "@/components/ui/use-toast";
-import { CATEGORY_LABELS } from "@/lib/utils";
+import { CATEGORY_LABELS, pluralTenders } from "@/lib/utils";
 import { computeMatch } from "@/components/CompetencyPanel";
 import type { Tender } from "@shared/schema";
 import type { TenderCompetencyItem, CompetencyItem } from "@shared/schema";
@@ -154,7 +154,7 @@ export default function TendersPage() {
           </button>
 
           <span className="hidden md:block text-sm shrink-0" style={{ color: "var(--text-muted)" }}>
-            {tenderList.length} тендеров
+            {pluralTenders(tenderList.length)}
           </span>
         </header>
 
@@ -212,7 +212,7 @@ export default function TendersPage() {
                 </button>
               ))}
             </div>
-            <p className="text-xs" style={{ color: "var(--text-muted)" }}>{tenderList.length} тендеров</p>
+            <p className="text-xs" style={{ color: "var(--text-muted)" }}>{pluralTenders(tenderList.length)}</p>
           </div>
         )}
 

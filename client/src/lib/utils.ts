@@ -5,6 +5,15 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export function pluralTenders(n: number) {
+  const abs = Math.abs(n) % 100;
+  const mod = abs % 10;
+  if (abs >= 11 && abs <= 19) return `${n} тендеров`;
+  if (mod === 1) return `${n} тендер`;
+  if (mod >= 2 && mod <= 4) return `${n} тендера`;
+  return `${n} тендеров`;
+}
+
 export function formatDate(date: string | Date | null | undefined) {
   if (!date) return "—";
   return new Intl.DateTimeFormat("ru-RU", { day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date(date));
