@@ -102,6 +102,44 @@ export default function CompetenciesPage() {
 
   const isDirty = local !== null;
 
+  const DEMO_COMPETENCIES: CompetencyItem[] = [
+    { name: "Python",           direction: "Backend",              experienceLevel: 4, proficiencyLevel: 4 },
+    { name: "Node.js",          direction: "Backend",              experienceLevel: 3, proficiencyLevel: 3 },
+    { name: "Java",             direction: "Backend",              experienceLevel: 2, proficiencyLevel: 2 },
+    { name: ".NET (C#)",        direction: "Backend",              experienceLevel: 1, proficiencyLevel: 1 },
+    { name: "Go",               direction: "Backend",              experienceLevel: 1, proficiencyLevel: 1 },
+    { name: "React",            direction: "Frontend",             experienceLevel: 4, proficiencyLevel: 3 },
+    { name: "TypeScript",       direction: "Frontend",             experienceLevel: 3, proficiencyLevel: 3 },
+    { name: "Vue",              direction: "Frontend",             experienceLevel: 2, proficiencyLevel: 2 },
+    { name: "PostgreSQL",       direction: "Базы данных",          experienceLevel: 4, proficiencyLevel: 4 },
+    { name: "MongoDB",          direction: "Базы данных",          experienceLevel: 3, proficiencyLevel: 3 },
+    { name: "MS SQL",           direction: "Базы данных",          experienceLevel: 2, proficiencyLevel: 2 },
+    { name: "Oracle",           direction: "Базы данных",          experienceLevel: 1, proficiencyLevel: 1 },
+    { name: "Docker",           direction: "DevOps",               experienceLevel: 4, proficiencyLevel: 3 },
+    { name: "Kubernetes",       direction: "DevOps",               experienceLevel: 2, proficiencyLevel: 2 },
+    { name: "CI/CD",            direction: "DevOps",               experienceLevel: 3, proficiencyLevel: 3 },
+    { name: "Machine Learning", direction: "AI / ML",              experienceLevel: 3, proficiencyLevel: 3 },
+    { name: "NLP",              direction: "AI / ML",              experienceLevel: 2, proficiencyLevel: 2 },
+    { name: "REST API",         direction: "Интеграции",           experienceLevel: 5, proficiencyLevel: 4 },
+    { name: "1С",               direction: "Интеграции",           experienceLevel: 0, proficiencyLevel: 0 },
+    { name: "Bitrix24",         direction: "Интеграции",           experienceLevel: 1, proficiencyLevel: 1 },
+    { name: "Flutter",          direction: "Мобильная разработка", experienceLevel: 1, proficiencyLevel: 1 },
+    { name: "iOS (Swift)",      direction: "Мобильная разработка", experienceLevel: 0, proficiencyLevel: 0 },
+    { name: "Android",          direction: "Мобильная разработка", experienceLevel: 1, proficiencyLevel: 1 },
+    { name: "QA (авто)",        direction: "Тестирование",         experienceLevel: 2, proficiencyLevel: 2 },
+    { name: "Бизнес-анализ",    direction: "Аналитика",            experienceLevel: 2, proficiencyLevel: 2 },
+  ];
+
+  const isAllZero = items.every((i) => i.experienceLevel === 0 && i.proficiencyLevel === 0);
+
+  const fillDemo = () => {
+    const base = COMPETENCY_CATALOG.map((c) => {
+      const demo = DEMO_COMPETENCIES.find((d) => d.name === c.name);
+      return demo ?? { name: c.name, direction: c.direction, experienceLevel: 0, proficiencyLevel: 0 };
+    });
+    setLocal(base);
+  };
+
   const dirStats = (dir: string) => {
     const comps = COMPETENCY_CATALOG.filter((c) => c.direction === dir);
     const filled = comps.filter((c) => {
@@ -126,6 +164,15 @@ export default function CompetenciesPage() {
               Укажите опыт и уровень владения — это используется для сравнения с требованиями тендеров
             </p>
           </div>
+          {isAllZero && !isDirty && (
+            <button
+              onClick={fillDemo}
+              className="px-4 py-2 rounded-lg text-sm font-medium transition-all mr-2"
+              style={{ background: "rgba(99,102,241,0.12)", color: "var(--primary)", border: "1px solid rgba(99,102,241,0.3)" }}
+            >
+              Заполнить демо-данными
+            </button>
+          )}
           <button
             onClick={() => save.mutate()}
             disabled={!isDirty || save.isPending}
