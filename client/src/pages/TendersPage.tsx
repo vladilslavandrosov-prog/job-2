@@ -9,10 +9,18 @@ import { useAuth } from "@/lib/auth";
 import { apiRequest } from "@/lib/queryClient";
 import { toast } from "@/components/ui/use-toast";
 import { CATEGORY_LABELS } from "@/lib/utils";
+import { computeMatch } from "@/components/CompetencyPanel";
 import type { Tender } from "@shared/schema";
+import type { TenderCompetencyItem, CompetencyItem } from "@shared/schema";
 
 const CATEGORIES = Object.keys(CATEGORY_LABELS);
 const PLATFORMS = ["all", "zakupki.gov.ru", "sberbank-ast.ru", "roseltorg.ru"];
+const SCORE_FILTERS = [
+  { value: "all",    label: "Все оценки" },
+  { value: "high",   label: "Высокая 80+" },
+  { value: "medium", label: "Средняя 60–79" },
+  { value: "low",    label: "Низкая <60" },
+];
 
 async function fetchJSON<T>(url: string): Promise<T> {
   const r = await fetch(url, { credentials: "include" });
@@ -28,6 +36,7 @@ export default function TendersPage() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
   const [platform, setPlatform] = useState("all");
+  const [scoreFilter, setScoreFilter] = useState("all");
   const [selected, setSelected] = useState<Tender | null>(null);
   const [showFilters, setShowFilters] = useState(false);
 
@@ -50,7 +59,52 @@ export default function TendersPage() {
     retry: false,
   });
 
-  const tenderList = Array.isArray(tenders) ? tenders : [];
+  const rawList = Array.isArray(tenders) ? tenders : [];
+
+  // Fetch profile once (cached)
+  const { data: ourProfile = [] } = useQuery<CompetencyItem[]>({
+    queryKey: ["/api/competencies/profile"],
+    queryFn: async () => {
+      const r = await fetch("/api/competencies/profile", { credentials: "include" });
+      if (!r.ok) return [];
+      return r.json();
+    },
+    enabled: !!user,
+  });
+
+  // Fetch competencies for each tender (each cached individually)
+  const compQueries = useQuery<Record<number, number | null>>({
+    queryKey: ["/api/tender-scores", rawList.map((t) => t.id).join(",")],
+    queryFn: async () => {
+      const results: Record<number, number | null> = {};
+      await Promise.all(rawList.map(async (t) => {
+        try {
+          const r = await fetch(`/api/tenders/${t.id}/competencies`, { credentials: "include" });
+          const req: TenderCompetencyItem[] = await r.json();
+          const match = Array.isArray(req) && req.length > 0 && ourProfile.length > 0
+            ? computeMatch(req, ourProfile)
+            : null;
+          results[t.id] = match?.avg ?? null;
+        } catch { results[t.id] = null; }
+      }));
+      return results;
+    },
+    enabled: rawList.length > 0 && ourProfile.length > 0,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const scoreMap: Record<number, number | null> = compQueries.data ?? {};
+
+  const tenderList = rawList.filter((t) => {
+    if (scoreFilter === "all") return true;
+    const s = scoreMap[t.id];
+    if (s == null) return false;
+    if (scoreFilter === "high") return s >= 80;
+    if (scoreFilter === "medium") return s >= 60 && s < 80;
+    if (scoreFilter === "low") return s < 60;
+    return true;
+  });
+
   const savedIds = new Set((Array.isArray(saved) ? saved : []).map((t) => t.id));
 
   const toggleSave = useMutation({
@@ -59,7 +113,7 @@ export default function TendersPage() {
     onError: (e: any) => toast({ variant: "destructive", title: "Ошибка", description: e.message }),
   });
 
-  const filtersActive = category !== "all" || platform !== "all";
+  const filtersActive = category !== "all" || platform !== "all" || scoreFilter !== "all";
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: "var(--bg)" }}>
@@ -142,6 +196,22 @@ export default function TendersPage() {
                 </button>
               ))}
             </div>
+            <div className="flex overflow-x-auto gap-1.5 pb-1 scrollbar-none">
+              {SCORE_FILTERS.map((sf) => (
+                <button
+                  key={sf.value}
+                  onClick={() => setScoreFilter(sf.value)}
+                  className="px-3 py-1.5 rounded-full text-xs whitespace-nowrap transition-colors shrink-0"
+                  style={
+                    scoreFilter === sf.value
+                      ? { background: "rgba(6,182,212,0.15)", color: "#06B6D4", border: "1px solid rgba(6,182,212,0.4)" }
+                      : { background: "var(--border-2)", color: "var(--text-muted)", border: "1px solid transparent" }
+                  }
+                >
+                  {sf.label}
+                </button>
+              ))}
+            </div>
             <p className="text-xs" style={{ color: "var(--text-muted)" }}>{tenderList.length} тендеров</p>
           </div>
         )}
@@ -189,6 +259,22 @@ export default function TendersPage() {
                   </button>
                 ))}
               </div>
+              <div className="flex flex-wrap gap-1.5">
+                {SCORE_FILTERS.map((sf) => (
+                  <button
+                    key={sf.value}
+                    onClick={() => setScoreFilter(sf.value)}
+                    className="px-2.5 py-1 rounded-full text-xs transition-colors"
+                    style={
+                      scoreFilter === sf.value
+                        ? { background: "rgba(6,182,212,0.15)", color: "#06B6D4", border: "1px solid rgba(6,182,212,0.4)" }
+                        : { background: "var(--border-2)", color: "var(--text-muted)", border: "1px solid transparent" }
+                    }
+                  >
+                    {sf.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div className="flex-1 overflow-y-auto p-3 space-y-2 pb-20 md:pb-3">
@@ -205,6 +291,7 @@ export default function TendersPage() {
                   <TenderCard
                     key={tender.id}
                     tender={tender}
+                    ourScore={scoreMap[tender.id] ?? null}
                     isSelected={selected?.id === tender.id}
                     isSaved={savedIds.has(tender.id)}
                     onClick={() => setSelected(tender)}
