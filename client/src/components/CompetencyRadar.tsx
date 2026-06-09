@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import {
   RadarChart,
   Radar,
@@ -27,7 +28,7 @@ interface TooltipPayload {
 function CustomTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
   const req = payload.find((p: TooltipPayload) => p.name === "Требование");
-  const our = payload.find((p: TooltipPayload) => p.name === "Наша команда");
+  const our = payload.find((p: TooltipPayload) => p.name === "Наш профиль");
   const mode = payload[0]?.payload?._mode as "experience" | "proficiency";
   const labels = mode === "experience" ? EXPERIENCE_LABELS : PROFICIENCY_LABELS;
 
@@ -60,6 +61,10 @@ function CustomTooltip({ active, payload, label }: any) {
 }
 
 export function CompetencyRadar({ required, ours, mode }: Props) {
+  // Force re-render after mount so ResponsiveContainer gets real parent width
+  const [ready, setReady] = useState(false);
+  useEffect(() => { const t = setTimeout(() => setReady(true), 50); return () => clearTimeout(t); }, []);
+
   const oursMap = new Map(ours.map((c) => [c.name, c]));
 
   const data = required.map((req) => {
@@ -77,6 +82,8 @@ export function CompetencyRadar({ required, ours, mode }: Props) {
 
   const title = mode === "experience" ? "Опыт (годы)" : "Уровень владения";
   const labels = mode === "experience" ? EXPERIENCE_LABELS : PROFICIENCY_LABELS;
+
+  if (!ready) return <div style={{ height: 280 }} />;
 
   return (
     <div className="flex flex-col items-center">
