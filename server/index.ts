@@ -82,12 +82,8 @@ async function runSeed() {
     demoUser = existing;
   }
 
-  // Demo competency profile — «Разработка ПО» направление, сильный backend
-  const [existingProfile] = await db.select().from(competencyProfiles).where(eq(competencyProfiles.userId, demoUser.id));
-  if (!existingProfile) {
-    await db.insert(competencyProfiles).values({
-      userId: demoUser.id,
-      competencies: [
+  // Demo competency profile — всегда обновляем до актуальных данных
+  const demoCompetencies = [
         { name: "Python",        direction: "Backend",               experienceLevel: 4, proficiencyLevel: 4 },
         { name: "Node.js",       direction: "Backend",               experienceLevel: 3, proficiencyLevel: 3 },
         { name: "Java",          direction: "Backend",               experienceLevel: 2, proficiencyLevel: 2 },
@@ -113,9 +109,16 @@ async function runSeed() {
         { name: "Android",       direction: "Мобильная разработка",  experienceLevel: 1, proficiencyLevel: 1 },
         { name: "QA (авто)",     direction: "Тестирование",          experienceLevel: 2, proficiencyLevel: 2 },
         { name: "Бизнес-анализ", direction: "Аналитика",             experienceLevel: 2, proficiencyLevel: 2 },
-      ],
-    });
+  ];
+  const [existingProfile] = await db.select().from(competencyProfiles).where(eq(competencyProfiles.userId, demoUser.id));
+  if (!existingProfile) {
+    await db.insert(competencyProfiles).values({ userId: demoUser.id, competencies: demoCompetencies });
     console.log("Demo competency profile created.");
+  } else {
+    await db.update(competencyProfiles)
+      .set({ competencies: demoCompetencies, updatedAt: new Date() })
+      .where(eq(competencyProfiles.userId, demoUser.id));
+    console.log("Demo competency profile updated.");
   }
 
   // 10 Dev tenders — вставляем если ещё нет по URL

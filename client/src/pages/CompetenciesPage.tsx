@@ -121,7 +121,7 @@ export default function CompetenciesPage() {
           style={{ borderBottom: "1px solid var(--border)" }}
         >
           <div>
-            <h1 className="text-lg font-semibold" style={{ color: "var(--text)" }}>Наши компетенции</h1>
+            <h1 className="text-lg font-semibold" style={{ color: "var(--text)" }}>Наш профиль</h1>
             <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
               Укажите опыт и уровень владения — это используется для сравнения с требованиями тендеров
             </p>

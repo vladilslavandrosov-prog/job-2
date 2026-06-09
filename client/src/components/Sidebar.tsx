@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 const nav = [
   { href: "/", label: "Тендеры", icon: LayoutDashboard },
-  { href: "/competencies", label: "Наши компетенции", icon: BadgeCheck },
+  { href: "/competencies", label: "Наш профиль", icon: BadgeCheck },
   { href: "/billing", label: "Тарифы", icon: CreditCard },
 ];
 
