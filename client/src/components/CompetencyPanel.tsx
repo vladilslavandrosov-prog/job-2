@@ -18,7 +18,7 @@ type Mode = "experience" | "proficiency";
 export const REQ_COLOR = "#6366F1";
 export const OUR_COLOR = "#06B6D4";
 
-function computeMatch(required: TenderCompetencyItem[], ours: CompetencyItem[]) {
+export function computeMatch(required: TenderCompetencyItem[], ours: CompetencyItem[]) {
   if (!required.length) return null;
   const map = new Map(ours.map((c) => [c.name, c]));
   let expSum = 0, profSum = 0;

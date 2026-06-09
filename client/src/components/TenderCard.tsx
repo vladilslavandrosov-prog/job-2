@@ -1,7 +1,10 @@
+import { useQuery } from "@tanstack/react-query";
 import { Bookmark, Calendar, Building2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn, formatDate, getCategoryLabel, getScoreColor } from "@/lib/utils";
+import { computeMatch } from "@/components/CompetencyPanel";
 import type { Tender } from "@shared/schema";
+import type { TenderCompetencyItem, CompetencyItem } from "@shared/schema";
 
 interface TenderCardProps {
   tender: Tender;
@@ -11,7 +14,34 @@ interface TenderCardProps {
   onSave?: () => void;
 }
 
+function useOurScore(tenderId: number) {
+  const { data: required = [] } = useQuery<TenderCompetencyItem[]>({
+    queryKey: [`/api/tenders/${tenderId}/competencies`],
+    queryFn: async () => {
+      const r = await fetch(`/api/tenders/${tenderId}/competencies`, { credentials: "include" });
+      return r.json();
+    },
+  });
+
+  const { data: ours = [] } = useQuery<CompetencyItem[]>({
+    queryKey: ["/api/competencies/profile"],
+    queryFn: async () => {
+      const r = await fetch("/api/competencies/profile", { credentials: "include" });
+      if (!r.ok) return [];
+      return r.json();
+    },
+  });
+
+  const hasRequired = Array.isArray(required) && required.length > 0;
+  const hasOurs = Array.isArray(ours) && ours.length > 0;
+  const match = hasRequired && hasOurs ? computeMatch(required, ours) : null;
+  return match?.avg ?? null;
+}
+
 export function TenderCard({ tender, isSelected, isSaved, onClick, onSave }: TenderCardProps) {
+  const ourScore = useOurScore(tender.id);
+  const displayScore = ourScore;
+
   return (
     <div
       onClick={onClick}
@@ -48,10 +78,10 @@ export function TenderCard({ tender, isSelected, isSaved, onClick, onSave }: Ten
           </div>
         </div>
         <div className="flex flex-col items-end gap-2 shrink-0">
-          {tender.aiScore != null && (
+          {displayScore != null && (
             <div className="text-center">
-              <div className={cn("text-lg font-bold", getScoreColor(tender.aiScore))}>{tender.aiScore}</div>
-              <div className="text-[10px]" style={{ color: "var(--text-muted)" }}>Оценка</div>
+              <div className={cn("text-lg font-bold", getScoreColor(displayScore))}>{displayScore}</div>
+              <div className="text-[10px]" style={{ color: "var(--text-muted)" }}>Наша оценка</div>
             </div>
           )}
           <button
