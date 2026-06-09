@@ -39,7 +39,7 @@ export function computeAdjustedScore(aiScore: number, matchAvg: number) {
   return Math.round(aiScore * 0.55 + matchAvg * 0.45);
 }
 
-export function CompetencyPanel({ tenderId, aiScore }: Props) {
+export function CompetencyPanel({ tenderId, aiScore, onScoreComputed }: Props) {
   const [expanded, setExpanded] = useState(false);
   const [mode, setMode] = useState<Mode>("experience");
   const [, setLocation] = useLocation();
@@ -65,6 +65,13 @@ export function CompetencyPanel({ tenderId, aiScore }: Props) {
   const hasOurs = Array.isArray(ours) && ours.length > 0;
   const match = hasRequired && hasOurs ? computeMatch(required, ours) : null;
   const adjustedScore = match && aiScore != null ? computeAdjustedScore(aiScore, match.avg) : null;
+
+  // Notify parent once adjusted score is ready
+  const reportedRef = useState<number | null>(null);
+  if (adjustedScore != null && reportedRef[0] !== adjustedScore) {
+    reportedRef[1](adjustedScore);
+    onScoreComputed?.(adjustedScore);
+  }
 
   // Группировка по направлениям
   const directions = hasRequired

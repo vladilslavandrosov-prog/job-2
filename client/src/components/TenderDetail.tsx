@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { ExternalLink, X, ArrowLeft, Building2, Calendar, Tag, Globe, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +15,8 @@ interface TenderDetailProps {
 }
 
 export function TenderDetail({ tender, isSaved, onClose, onSave }: TenderDetailProps) {
+  const [adjustedScore, setAdjustedScore] = useState<number | null>(null);
+  const displayScore = adjustedScore ?? tender.aiScore;
   return (
     <div className="flex flex-col h-full" style={{ background: "var(--bg)" }}>
       <div
@@ -46,24 +49,24 @@ export function TenderDetail({ tender, isSaved, onClose, onSave }: TenderDetailP
             style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}
           >
             <div className="text-center shrink-0">
-              <div className={cn("text-3xl font-bold", getScoreColor(tender.aiScore))}>{tender.aiScore}</div>
+              <div className={cn("text-3xl font-bold", getScoreColor(displayScore!))}>{displayScore}</div>
               <div className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>AI Score</div>
             </div>
             <div className="flex-1">
               <div className="h-2 rounded-full overflow-hidden" style={{ background: "var(--score-bar)" }}>
-                <div className={cn("h-full rounded-full", getScoreBg(tender.aiScore))} style={{ width: `${tender.aiScore}%` }} />
+                <div className={cn("h-full rounded-full", getScoreBg(displayScore!))} style={{ width: `${displayScore}%` }} />
               </div>
               <p className="text-xs mt-2" style={{ color: "var(--text-muted)" }}>
-                {tender.aiScore >= 90 ? "Отличное соответствие"
-                  : tender.aiScore >= 75 ? "Хорошее соответствие"
-                  : tender.aiScore >= 60 ? "Среднее соответствие"
+                {displayScore! >= 90 ? "Отличное соответствие"
+                  : displayScore! >= 75 ? "Хорошее соответствие"
+                  : displayScore! >= 60 ? "Среднее соответствие"
                   : "Низкое соответствие"}
               </p>
             </div>
           </div>
         )}
 
-        <CompetencyPanel tenderId={tender.id} aiScore={tender.aiScore} />
+        <CompetencyPanel tenderId={tender.id} aiScore={tender.aiScore} onScoreComputed={setAdjustedScore} />
 
         <div className="grid grid-cols-2 gap-3">
           <div
