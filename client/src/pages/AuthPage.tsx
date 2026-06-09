@@ -33,27 +33,36 @@ export default function AuthPage() {
   });
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0B0B0F] p-4">
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: "var(--bg)" }}>
       <div className="w-full max-w-md">
         <div className="flex items-center justify-center gap-3 mb-8">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] flex items-center justify-center">
             <Zap size={20} className="text-white" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-[#F9FAFB]">TenderAI</h1>
-            <p className="text-xs text-[#6B7280]">AI-агрегатор ИТ-тендеров</p>
+            <h1 className="text-2xl font-bold" style={{ color: "var(--text)" }}>TenderAI</h1>
+            <p className="text-xs" style={{ color: "var(--text-muted)" }}>AI-агрегатор ИТ-тендеров</p>
           </div>
         </div>
 
-        <div className="bg-[#13131A] border border-[#2A2A3A] rounded-xl p-6">
-          <div className="flex rounded-lg bg-[#0B0B0F] p-1 mb-6">
+        <div
+          className="rounded-xl p-6"
+          style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}
+        >
+          <div
+            className="flex rounded-lg p-1 mb-6"
+            style={{ background: "var(--bg)" }}
+          >
             {(["login", "register"] as const).map((t) => (
               <button
                 key={t}
                 onClick={() => setTab(t)}
-                className={`flex-1 py-2 text-sm font-medium rounded-md transition-colors ${
-                  tab === t ? "bg-[#6366F1] text-white" : "text-[#6B7280] hover:text-[#F9FAFB]"
-                }`}
+                className="flex-1 py-2 text-sm font-medium rounded-md transition-colors"
+                style={
+                  tab === t
+                    ? { background: "var(--primary)", color: "#fff" }
+                    : { color: "var(--text-muted)" }
+                }
               >
                 {t === "login" ? "Вход" : "Регистрация"}
               </button>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Search, RefreshCw, SlidersHorizontal, X } from "lucide-react";
+import { Search, RefreshCw, SlidersHorizontal, Filter } from "lucide-react";
 import { Sidebar } from "@/components/Sidebar";
 import { TenderCard } from "@/components/TenderCard";
 import { TenderDetail } from "@/components/TenderDetail";
@@ -59,19 +59,18 @@ export default function TendersPage() {
     onError: (e: any) => toast({ variant: "destructive", title: "Ошибка", description: e.message }),
   });
 
-  const handleSelect = (tender: Tender) => setSelected(tender);
-  const handleClose = () => setSelected(null);
+  const filtersActive = category !== "all" || platform !== "all";
 
   return (
-    <div className="flex h-screen bg-[#0B0B0F] overflow-hidden">
+    <div className="flex h-screen overflow-hidden" style={{ background: "var(--bg)" }}>
       <Sidebar />
 
-      {/* Main content — shifts right on desktop (sidebar), padded bottom on mobile (bottom nav) */}
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
-
         {/* Header */}
-        <header className="flex items-center gap-3 px-4 py-3 border-b border-[#2A2A3A] shrink-0">
-          {/* Mobile logo */}
+        <header
+          className="flex items-center gap-3 px-4 py-3 shrink-0"
+          style={{ borderBottom: "1px solid var(--border)" }}
+        >
           <div className="md:hidden flex items-center gap-2 mr-1">
             <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] flex items-center justify-center">
               <span className="text-white text-xs font-bold">T</span>
@@ -79,7 +78,7 @@ export default function TendersPage() {
           </div>
 
           <div className="relative flex-1">
-            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6B7280]" />
+            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "var(--text-muted)" }} />
             <Input
               placeholder="Поиск тендеров..."
               value={search}
@@ -90,29 +89,38 @@ export default function TendersPage() {
 
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className={`md:hidden flex items-center justify-center w-9 h-9 rounded-lg border transition-colors shrink-0 ${
-              showFilters || category !== "all" || platform !== "all"
-                ? "bg-[#6366F1]/20 border-[#6366F1]/50 text-[#6366F1]"
-                : "border-[#2A2A3A] text-[#6B7280]"
-            }`}
+            className="md:hidden flex items-center justify-center w-9 h-9 rounded-lg border transition-colors shrink-0"
+            style={
+              showFilters || filtersActive
+                ? { background: "rgba(99,102,241,0.15)", borderColor: "rgba(99,102,241,0.5)", color: "var(--primary)" }
+                : { borderColor: "var(--border)", color: "var(--text-muted)" }
+            }
           >
             <SlidersHorizontal size={16} />
           </button>
 
-          <span className="hidden md:block text-sm text-[#6B7280] shrink-0">{tenderList.length} тендеров</span>
+          <span className="hidden md:block text-sm shrink-0" style={{ color: "var(--text-muted)" }}>
+            {tenderList.length} тендеров
+          </span>
         </header>
 
-        {/* Mobile filters dropdown */}
+        {/* Mobile filters */}
         {showFilters && (
-          <div className="md:hidden px-4 py-3 border-b border-[#2A2A3A] space-y-3 bg-[#13131A]">
+          <div
+            className="md:hidden px-4 py-3 space-y-3"
+            style={{ borderBottom: "1px solid var(--border)", background: "var(--bg-card)" }}
+          >
             <div className="flex overflow-x-auto gap-1.5 pb-1 scrollbar-none">
               {CATEGORIES.map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setCategory(cat)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors shrink-0 ${
-                    category === cat ? "bg-[#6366F1] text-white" : "bg-[#1A1A24] text-[#9CA3AF]"
-                  }`}
+                  className="px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors shrink-0"
+                  style={
+                    category === cat
+                      ? { background: "var(--primary)", color: "#fff" }
+                      : { background: "var(--border-2)", color: "var(--text-muted)" }
+                  }
                 >
                   {CATEGORY_LABELS[cat]}
                 </button>
@@ -123,39 +131,43 @@ export default function TendersPage() {
                 <button
                   key={p}
                   onClick={() => setPlatform(p)}
-                  className={`px-3 py-1.5 rounded-full text-xs whitespace-nowrap transition-colors shrink-0 ${
+                  className="px-3 py-1.5 rounded-full text-xs whitespace-nowrap transition-colors shrink-0"
+                  style={
                     platform === p
-                      ? "bg-[#8B5CF6]/20 text-[#8B5CF6] border border-[#8B5CF6]/40"
-                      : "bg-[#1A1A24] text-[#9CA3AF]"
-                  }`}
+                      ? { background: "rgba(139,92,246,0.15)", color: "var(--accent)", border: "1px solid rgba(139,92,246,0.4)" }
+                      : { background: "var(--border-2)", color: "var(--text-muted)", border: "1px solid transparent" }
+                  }
                 >
                   {p === "all" ? "Все площадки" : p}
                 </button>
               ))}
             </div>
-            <p className="text-xs text-[#6B7280]">{tenderList.length} тендеров</p>
+            <p className="text-xs" style={{ color: "var(--text-muted)" }}>{tenderList.length} тендеров</p>
           </div>
         )}
 
-        {/* Desktop: two-column layout. Mobile: single column */}
         <div className="flex flex-1 overflow-hidden">
-
-          {/* List panel — hidden on mobile when tender is selected */}
-          <div className={`
-            flex flex-col overflow-hidden shrink-0
-            ${selected ? "hidden md:flex" : "flex"}
-            w-full md:w-96 md:border-r md:border-[#2A2A3A]
-          `}>
+          {/* List */}
+          <div
+            className={`flex flex-col overflow-hidden shrink-0 ${selected ? "hidden md:flex" : "flex"} w-full md:w-96`}
+            style={{ borderRight: "1px solid var(--border)" }}
+          >
             {/* Desktop filters */}
-            <div className="hidden md:block p-4 border-b border-[#2A2A3A] space-y-3">
+            <div
+              className="hidden md:block p-4 space-y-3"
+              style={{ borderBottom: "1px solid var(--border)" }}
+            >
               <div className="flex flex-wrap gap-1.5">
                 {CATEGORIES.map((cat) => (
                   <button
                     key={cat}
                     onClick={() => setCategory(cat)}
-                    className={`px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
-                      category === cat ? "bg-[#6366F1] text-white" : "bg-[#1A1A24] text-[#9CA3AF] hover:bg-[#2A2A3A]"
-                    }`}
+                    className="px-2.5 py-1 rounded-full text-xs font-medium transition-colors"
+                    style={
+                      category === cat
+                        ? { background: "var(--primary)", color: "#fff" }
+                        : { background: "var(--border-2)", color: "var(--text-muted)" }
+                    }
                   >
                     {CATEGORY_LABELS[cat]}
                   </button>
@@ -166,11 +178,12 @@ export default function TendersPage() {
                   <button
                     key={p}
                     onClick={() => setPlatform(p)}
-                    className={`px-2.5 py-1 rounded-full text-xs transition-colors ${
+                    className="px-2.5 py-1 rounded-full text-xs transition-colors"
+                    style={
                       platform === p
-                        ? "bg-[#8B5CF6]/20 text-[#8B5CF6] border border-[#8B5CF6]/40"
-                        : "bg-[#1A1A24] text-[#9CA3AF] hover:bg-[#2A2A3A]"
-                    }`}
+                        ? { background: "rgba(139,92,246,0.15)", color: "var(--accent)", border: "1px solid rgba(139,92,246,0.4)" }
+                        : { background: "var(--border-2)", color: "var(--text-muted)", border: "1px solid transparent" }
+                    }
                   >
                     {p === "all" ? "Все площадки" : p}
                   </button>
@@ -180,11 +193,13 @@ export default function TendersPage() {
 
             <div className="flex-1 overflow-y-auto p-3 space-y-2 pb-20 md:pb-3">
               {isLoading ? (
-                <div className="flex items-center justify-center h-32 text-[#6B7280]">
+                <div className="flex items-center justify-center h-32" style={{ color: "var(--text-muted)" }}>
                   <RefreshCw size={18} className="animate-spin mr-2" /> Загрузка...
                 </div>
               ) : tenderList.length === 0 ? (
-                <div className="flex items-center justify-center h-32 text-[#6B7280] text-sm">Тендеры не найдены</div>
+                <div className="flex items-center justify-center h-32 text-sm" style={{ color: "var(--text-muted)" }}>
+                  Тендеры не найдены
+                </div>
               ) : (
                 tenderList.map((tender) => (
                   <TenderCard
@@ -192,7 +207,7 @@ export default function TendersPage() {
                     tender={tender}
                     isSelected={selected?.id === tender.id}
                     isSaved={savedIds.has(tender.id)}
-                    onClick={() => handleSelect(tender)}
+                    onClick={() => setSelected(tender)}
                     onSave={() => user && toggleSave.mutate(tender.id)}
                   />
                 ))
@@ -200,23 +215,28 @@ export default function TendersPage() {
             </div>
           </div>
 
-          {/* Detail panel */}
+          {/* Detail */}
           {selected ? (
             <div className="flex-1 overflow-hidden flex flex-col">
               <TenderDetail
                 tender={selected}
                 isSaved={savedIds.has(selected.id)}
-                onClose={handleClose}
+                onClose={() => setSelected(null)}
                 onSave={() => user && toggleSave.mutate(selected.id)}
               />
             </div>
           ) : (
             <div className="hidden md:flex flex-1 flex-col items-center justify-center text-center p-8">
-              <div className="w-16 h-16 rounded-2xl bg-[#6366F1]/10 flex items-center justify-center mb-4">
-                <Search size={28} className="text-[#6366F1]" />
+              <div
+                className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
+                style={{ background: "rgba(99,102,241,0.1)" }}
+              >
+                <Filter size={28} style={{ color: "var(--primary)" }} />
               </div>
-              <h3 className="text-lg font-medium text-[#F9FAFB] mb-2">Выберите тендер</h3>
-              <p className="text-sm text-[#6B7280] max-w-xs">Нажмите на любой тендер из списка, чтобы просмотреть подробную информацию</p>
+              <h3 className="text-lg font-medium mb-2" style={{ color: "var(--text)" }}>Выберите тендер</h3>
+              <p className="text-sm max-w-xs" style={{ color: "var(--text-muted)" }}>
+                Нажмите на любой тендер из списка, чтобы просмотреть подробную информацию
+              </p>
             </div>
           )}
         </div>

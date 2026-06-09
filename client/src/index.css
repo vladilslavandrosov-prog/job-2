@@ -2,35 +2,59 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Light theme (default) ─────────────────────────────── */
+:root {
+  --bg:        #F5F5F8;
+  --bg-card:   #FFFFFF;
+  --bg-input:  #FFFFFF;
+  --border:    #E2E2EB;
+  --border-2:  #EBEBF3;
+  --text:      #111118;
+  --text-2:    #4B4B63;
+  --text-muted:#8888A4;
+  --sidebar:   #FFFFFF;
+  --primary:   #6366F1;
+  --accent:    #8B5CF6;
+  --score-bar: #E2E2EB;
+}
+
+/* ── Dark theme ────────────────────────────────────────── */
+.dark {
+  --bg:        #0B0B0F;
+  --bg-card:   #13131A;
+  --bg-input:  #13131A;
+  --border:    #2A2A3A;
+  --border-2:  #1A1A24;
+  --text:      #F9FAFB;
+  --text-2:    #D1D5DB;
+  --text-muted:#6B7280;
+  --sidebar:   #13131A;
+  --primary:   #6366F1;
+  --accent:    #8B5CF6;
+  --score-bar: #2A2A3A;
+}
+
 body {
   margin: 0;
-  background-color: #0B0B0F;
-  color: #F9FAFB;
+  background-color: var(--bg);
+  color: var(--text);
   font-family: Inter, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.2s, color 0.2s;
 }
 
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track { background: #13131A; }
-::-webkit-scrollbar-thumb { background: #2A2A3A; border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: #3A3A4A; }
+/* ── Scrollbars ────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-card); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
-/* Hide scrollbar for filter chips */
-.scrollbar-none {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
+.scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
 .scrollbar-none::-webkit-scrollbar { display: none; }
 
-/* Safe area for iPhone notch / home bar */
+/* ── Safe area / iOS ───────────────────────────────────── */
 .safe-bottom {
   padding-bottom: max(0.625rem, env(safe-area-inset-bottom));
 }
 
-/* Prevent overscroll bounce on iOS */
-html, body {
-  overscroll-behavior: none;
-}
+html, body { overscroll-behavior: none; }

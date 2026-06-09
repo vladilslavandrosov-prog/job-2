@@ -39,13 +39,13 @@ export default function BillingPage() {
   });
 
   return (
-    <div className="flex h-screen bg-[#0B0B0F] overflow-hidden">
+    <div className="flex h-screen overflow-hidden" style={{ background: "var(--bg)" }}>
       <Sidebar />
       <div className="flex-1 overflow-y-auto pb-20 md:pb-0">
         <div className="max-w-5xl mx-auto p-4 md:p-8">
           <div className="text-center mb-8 md:mb-10">
-            <h1 className="text-2xl md:text-3xl font-bold text-[#F9FAFB] mb-2">Тарифные планы</h1>
-            <p className="text-[#6B7280]">Выберите подходящий план для вашего бизнеса</p>
+            <h1 className="text-2xl md:text-3xl font-bold mb-2" style={{ color: "var(--text)" }}>Тарифные планы</h1>
+            <p style={{ color: "var(--text-muted)" }}>Выберите подходящий план для вашего бизнеса</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {PLANS.map((plan) => {
@@ -54,10 +54,12 @@ export default function BillingPage() {
               return (
                 <div
                   key={plan.id}
-                  className={cn(
-                    "relative rounded-xl border p-6 flex flex-col",
-                    plan.popular ? "border-[#6366F1]/60 bg-[#6366F1]/5" : "border-[#2A2A3A] bg-[#13131A]"
-                  )}
+                  className="relative rounded-xl border p-6 flex flex-col"
+                  style={
+                    plan.popular
+                      ? { borderColor: "rgba(99,102,241,0.6)", background: "rgba(99,102,241,0.05)" }
+                      : { borderColor: "var(--border)", background: "var(--bg-card)" }
+                  }
                 >
                   {plan.popular && (
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-[#6366F1] text-white text-xs font-medium rounded-full">
@@ -65,18 +67,21 @@ export default function BillingPage() {
                     </div>
                   )}
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: `${plan.color}20` }}>
+                    <div
+                      className="w-10 h-10 rounded-lg flex items-center justify-center"
+                      style={{ backgroundColor: `${plan.color}20` }}
+                    >
                       <Icon size={20} style={{ color: plan.color }} />
                     </div>
-                    <h3 className="font-semibold text-[#F9FAFB]">{plan.name}</h3>
+                    <h3 className="font-semibold" style={{ color: "var(--text)" }}>{plan.name}</h3>
                   </div>
                   <div className="mb-6">
-                    <span className="text-3xl font-bold text-[#F9FAFB]">{plan.price}</span>
-                    <span className="text-[#6B7280] text-sm ml-2">{plan.period}</span>
+                    <span className="text-3xl font-bold" style={{ color: "var(--text)" }}>{plan.price}</span>
+                    <span className="text-sm ml-2" style={{ color: "var(--text-muted)" }}>{plan.period}</span>
                   </div>
                   <ul className="space-y-2.5 mb-6 flex-1">
                     {plan.features.map((f) => (
-                      <li key={f} className="flex items-center gap-2.5 text-sm text-[#D1D5DB]">
+                      <li key={f} className="flex items-center gap-2.5 text-sm" style={{ color: "var(--text-2)" }}>
                         <Check size={14} style={{ color: plan.color }} className="shrink-0" />
                         {f}
                       </li>
