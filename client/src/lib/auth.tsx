@@ -42,8 +42,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       body: JSON.stringify({ username, password }),
       credentials: "include",
     });
-    if (!res.ok) throw new Error((await res.json()).error);
-    setUser(await res.clone().json());
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    setUser(data);
     setLocation("/");
   };
 
@@ -54,8 +55,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       body: JSON.stringify({ username, email, password }),
       credentials: "include",
     });
-    if (!res.ok) throw new Error((await res.json()).error);
-    setUser(await res.clone().json());
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    setUser(data);
     setLocation("/");
   };
 
@@ -65,6 +67,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     queryClient.clear();
     setLocation("/auth");
   };
+
+  if (loading) {
+    return (
+      <div style={{ minHeight: "100vh", background: "#0B0B0F", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ color: "#6366F1", fontSize: 14 }}>Загрузка...</div>
+      </div>
+    );
+  }
 
   return (
     <AuthContext.Provider value={{ user, loading, login, register, logout }}>
