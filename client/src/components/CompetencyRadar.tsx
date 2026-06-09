@@ -6,7 +6,6 @@ import {
   PolarAngleAxis,
   PolarRadiusAxis,
   Tooltip,
-  Legend,
   ResponsiveContainer,
 } from "recharts";
 import type { TenderCompetencyItem, CompetencyItem } from "@shared/schema";
@@ -119,13 +118,16 @@ export function CompetencyRadar({ required, ours, mode }: Props) {
             dot={{ r: 4, fill: OUR_COLOR, strokeWidth: 0 }}
           />
           <Tooltip content={<CustomTooltip />} />
-          <Legend
-            iconType="circle"
-            iconSize={8}
-            wrapperStyle={{ fontSize: 11, color: "var(--text-muted)" }}
-          />
         </RadarChart>
       </ResponsiveContainer>
+      <div className="flex gap-4 text-xs mt-1" style={{ color: "var(--text-muted)" }}>
+        <span className="flex items-center gap-1.5">
+          <span style={{ color: REQ_COLOR, fontSize: 16, lineHeight: 1 }}>●</span> Требование
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span style={{ color: OUR_COLOR, fontSize: 16, lineHeight: 1 }}>●</span> Наш профиль
+        </span>
+      </div>
     </div>
   );
 }
