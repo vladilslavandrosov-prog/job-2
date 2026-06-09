@@ -332,6 +332,9 @@ async function runSeed() {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Trust reverse proxy (Amvera/nginx) so secure cookies work over HTTPS
+app.set("trust proxy", 1);
+
 const PgSession = connectPgSimple(session);
 
 app.use(
@@ -348,6 +351,7 @@ app.use(
       maxAge: 7 * 24 * 60 * 60 * 1000,
       httpOnly: true,
       secure: !isDev,
+      sameSite: "lax",
     },
   })
 );
