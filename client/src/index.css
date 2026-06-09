@@ -17,3 +17,20 @@ body {
 ::-webkit-scrollbar-track { background: #13131A; }
 ::-webkit-scrollbar-thumb { background: #2A2A3A; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #3A3A4A; }
+
+/* Hide scrollbar for filter chips */
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-none::-webkit-scrollbar { display: none; }
+
+/* Safe area for iPhone notch / home bar */
+.safe-bottom {
+  padding-bottom: max(0.625rem, env(safe-area-inset-bottom));
+}
+
+/* Prevent overscroll bounce on iOS */
+html, body {
+  overscroll-behavior: none;
+}

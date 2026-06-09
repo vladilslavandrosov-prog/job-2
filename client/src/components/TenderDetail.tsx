@@ -1,4 +1,4 @@
-import { ExternalLink, X, Building2, Calendar, Tag, Globe, Bookmark } from "lucide-react";
+import { ExternalLink, X, ArrowLeft, Building2, Calendar, Tag, Globe, Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -15,14 +15,24 @@ interface TenderDetailProps {
 export function TenderDetail({ tender, isSaved, onClose, onSave }: TenderDetailProps) {
   return (
     <div className="flex flex-col h-full bg-[#0B0B0F]">
-      <div className="flex items-start justify-between p-5 border-b border-[#2A2A3A]">
-        <h2 className="text-base font-semibold text-[#F9FAFB] leading-snug flex-1 pr-4">{tender.title}</h2>
-        <button onClick={onClose} className="text-[#6B7280] hover:text-[#F9FAFB] transition-colors shrink-0 mt-0.5">
+      <div className="flex items-start justify-between p-4 md:p-5 border-b border-[#2A2A3A] shrink-0">
+        {/* Mobile: back arrow. Desktop: title + X */}
+        <button
+          onClick={onClose}
+          className="md:hidden flex items-center gap-2 text-[#9CA3AF] hover:text-[#F9FAFB] transition-colors mr-3 shrink-0 mt-0.5"
+        >
+          <ArrowLeft size={20} />
+        </button>
+        <h2 className="text-base font-semibold text-[#F9FAFB] leading-snug flex-1 pr-2">{tender.title}</h2>
+        <button
+          onClick={onClose}
+          className="hidden md:block text-[#6B7280] hover:text-[#F9FAFB] transition-colors shrink-0 mt-0.5"
+        >
           <X size={18} />
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-5 space-y-5">
+      <div className="flex-1 overflow-y-auto p-4 md:p-5 space-y-4 md:space-y-5 pb-24 md:pb-5">
         {tender.aiScore != null && (
           <div className="flex items-center gap-4 p-4 rounded-lg bg-[#13131A] border border-[#2A2A3A]">
             <div className="text-center shrink-0">
@@ -34,15 +44,23 @@ export function TenderDetail({ tender, isSaved, onClose, onSave }: TenderDetailP
                 <div className={cn("h-full rounded-full", getScoreBg(tender.aiScore))} style={{ width: `${tender.aiScore}%` }} />
               </div>
               <p className="text-xs text-[#6B7280] mt-2">
-                {tender.aiScore >= 90 ? "Отличное соответствие" : tender.aiScore >= 75 ? "Хорошее соответствие" : tender.aiScore >= 60 ? "Среднее соответствие" : "Низкое соответствие"}
+                {tender.aiScore >= 90
+                  ? "Отличное соответствие"
+                  : tender.aiScore >= 75
+                  ? "Хорошее соответствие"
+                  : tender.aiScore >= 60
+                  ? "Среднее соответствие"
+                  : "Низкое соответствие"}
               </p>
             </div>
           </div>
         )}
 
         <div className="grid grid-cols-2 gap-3">
-          <div className="p-3 rounded-lg bg-[#13131A] border border-[#2A2A3A]">
-            <div className="flex items-center gap-1.5 text-xs text-[#6B7280] mb-1"><Building2 size={12} />Заказчик</div>
+          <div className="p-3 rounded-lg bg-[#13131A] border border-[#2A2A3A] col-span-2 sm:col-span-1">
+            <div className="flex items-center gap-1.5 text-xs text-[#6B7280] mb-1">
+              <Building2 size={12} />Заказчик
+            </div>
             <p className="text-sm text-[#F9FAFB] font-medium">{tender.customer}</p>
           </div>
           {tender.budget && (
@@ -53,18 +71,24 @@ export function TenderDetail({ tender, isSaved, onClose, onSave }: TenderDetailP
           )}
           {tender.deadline && (
             <div className="p-3 rounded-lg bg-[#13131A] border border-[#2A2A3A]">
-              <div className="flex items-center gap-1.5 text-xs text-[#6B7280] mb-1"><Calendar size={12} />Дедлайн</div>
+              <div className="flex items-center gap-1.5 text-xs text-[#6B7280] mb-1">
+                <Calendar size={12} />Дедлайн
+              </div>
               <p className="text-sm text-[#F9FAFB] font-medium">{formatDate(tender.deadline)}</p>
             </div>
           )}
           <div className="p-3 rounded-lg bg-[#13131A] border border-[#2A2A3A]">
-            <div className="flex items-center gap-1.5 text-xs text-[#6B7280] mb-1"><Globe size={12} />Площадка</div>
+            <div className="flex items-center gap-1.5 text-xs text-[#6B7280] mb-1">
+              <Globe size={12} />Площадка
+            </div>
             <p className="text-sm text-[#F9FAFB] font-medium">{tender.platform}</p>
           </div>
         </div>
 
         <div>
-          <div className="flex items-center gap-1.5 text-xs text-[#6B7280] mb-2"><Tag size={12} />Категория</div>
+          <div className="flex items-center gap-1.5 text-xs text-[#6B7280] mb-2">
+            <Tag size={12} />Категория
+          </div>
           <Badge variant="default">{getCategoryLabel(tender.category)}</Badge>
         </div>
 
@@ -76,8 +100,14 @@ export function TenderDetail({ tender, isSaved, onClose, onSave }: TenderDetailP
         </div>
       </div>
 
-      <div className="p-5 border-t border-[#2A2A3A] flex gap-3">
-        <Button variant="outline" size="sm" onClick={onSave} className={cn(isSaved && "text-[#6366F1] border-[#6366F1]/50")}>
+      {/* Action buttons — fixed on mobile to avoid overlap with bottom nav */}
+      <div className="p-4 md:p-5 border-t border-[#2A2A3A] flex gap-3 shrink-0 mb-16 md:mb-0">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onSave}
+          className={cn("shrink-0", isSaved && "text-[#6366F1] border-[#6366F1]/50")}
+        >
           <Bookmark size={15} className="mr-2" fill={isSaved ? "currentColor" : "none"} />
           {isSaved ? "Сохранено" : "Сохранить"}
         </Button>

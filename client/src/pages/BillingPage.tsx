@@ -41,10 +41,10 @@ export default function BillingPage() {
   return (
     <div className="flex h-screen bg-[#0B0B0F] overflow-hidden">
       <Sidebar />
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-5xl mx-auto p-8">
-          <div className="text-center mb-10">
-            <h1 className="text-3xl font-bold text-[#F9FAFB] mb-2">Тарифные планы</h1>
+      <div className="flex-1 overflow-y-auto pb-20 md:pb-0">
+        <div className="max-w-5xl mx-auto p-4 md:p-8">
+          <div className="text-center mb-8 md:mb-10">
+            <h1 className="text-2xl md:text-3xl font-bold text-[#F9FAFB] mb-2">Тарифные планы</h1>
             <p className="text-[#6B7280]">Выберите подходящий план для вашего бизнеса</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
