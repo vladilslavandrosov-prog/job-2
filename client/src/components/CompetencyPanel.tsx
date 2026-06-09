@@ -14,7 +14,6 @@ interface Props {
 
 type Mode = "experience" | "proficiency";
 
-// Цвета: индиго для требований, циан для профиля
 export const REQ_COLOR = "#6366F1";
 export const OUR_COLOR = "#06B6D4";
 
@@ -40,8 +39,8 @@ export function computeAdjustedScore(_aiScore: number, matchAvg: number) {
 }
 
 export function CompetencyPanel({ tenderId, aiScore, onScoreComputed }: Props) {
-  const [expanded, setExpanded] = useState(false);
   const [mode, setMode] = useState<Mode>("experience");
+  const [listOpen, setListOpen] = useState(false);
   const [, setLocation] = useLocation();
 
   const { data: required = [], isLoading: loadingReq } = useQuery<TenderCompetencyItem[]>({
@@ -66,28 +65,21 @@ export function CompetencyPanel({ tenderId, aiScore, onScoreComputed }: Props) {
   const match = hasRequired && hasOurs ? computeMatch(required, ours) : null;
   const adjustedScore = match && aiScore != null ? computeAdjustedScore(aiScore, match.avg) : null;
 
-  // Notify parent once adjusted score is ready
   const reportedRef = useState<number | null>(null);
   if (adjustedScore != null && reportedRef[0] !== adjustedScore) {
     reportedRef[1](adjustedScore);
     onScoreComputed?.(adjustedScore);
   }
 
-  // Группировка по направлениям
-  const directions = hasRequired
-    ? [...new Set(required.map((r) => r.direction))]
-    : [];
+  const directions = hasRequired ? [...new Set(required.map((r) => r.direction))] : [];
 
-  const scoreColor = adjustedScore != null
-    ? adjustedScore >= 80 ? "#22C55E" : adjustedScore >= 60 ? "#F59E0B" : "#EF4444"
-    : "var(--text-muted)";
+  if (!hasRequired && !loadingReq) return null;
 
   return (
     <div className="rounded-lg overflow-hidden" style={{ border: "1px solid var(--border)" }}>
-      {/* Collapsed header — always visible */}
-      <button
-        onClick={() => setExpanded((v) => !v)}
-        className="w-full flex items-center justify-between px-4 py-3 transition-colors text-left"
+      {/* Header — always visible */}
+      <div
+        className="flex items-center justify-between px-4 py-3"
         style={{ background: "var(--bg-card)" }}
       >
         <div className="flex items-center gap-3 min-w-0">
@@ -106,12 +98,9 @@ export function CompetencyPanel({ tenderId, aiScore, onScoreComputed }: Props) {
               </span>
             </div>
           )}
-          {!hasRequired && !loadingReq && (
-            <span className="text-xs" style={{ color: "var(--text-muted)" }}>нет данных</span>
-          )}
           {hasRequired && !hasOurs && !loadingOurs && (
             <button
-              onClick={(e) => { e.stopPropagation(); setLocation("/competencies"); }}
+              onClick={() => setLocation("/competencies")}
               className="text-xs px-2 py-0.5 rounded-full font-medium transition-colors"
               style={{ background: `${REQ_COLOR}18`, color: REQ_COLOR, border: `1px solid ${REQ_COLOR}40` }}
             >
@@ -119,46 +108,49 @@ export function CompetencyPanel({ tenderId, aiScore, onScoreComputed }: Props) {
             </button>
           )}
         </div>
-        <div className="shrink-0 ml-2" style={{ color: "var(--text-muted)" }}>
-          {expanded ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
-        </div>
-      </button>
+      </div>
 
-      {/* Expanded content */}
-      {expanded && (
-        <div className="border-t p-4 space-y-4" style={{ borderColor: "var(--border)", background: "var(--bg)" }}>
-          {loadingReq || loadingOurs ? (
-            <div className="flex items-center justify-center h-20 text-sm" style={{ color: "var(--text-muted)" }}>
-              Загрузка...
-            </div>
-          ) : !hasRequired ? (
-            <div className="text-sm text-center py-4" style={{ color: "var(--text-muted)" }}>
-              Компетенции для этого тендера не определены
-            </div>
-          ) : (
-            <>
-              {/* Mode switcher */}
-              <div className="flex justify-end">
-                <div className="flex rounded-lg p-0.5" style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}>
-                  {(["experience", "proficiency"] as Mode[]).map((m) => (
-                    <button
-                      key={m}
-                      onClick={() => setMode(m)}
-                      className="px-3 py-1 text-xs rounded-md transition-colors"
-                      style={mode === m ? { background: "var(--primary)", color: "#fff" } : { color: "var(--text-muted)" }}
-                    >
-                      {m === "experience" ? "Опыт" : "Владение"}
-                    </button>
-                  ))}
-                </div>
+      {/* Radar + mode switcher — always visible */}
+      <div className="border-t p-4 space-y-3" style={{ borderColor: "var(--border)", background: "var(--bg)" }}>
+        {loadingReq || loadingOurs ? (
+          <div className="flex items-center justify-center h-20 text-sm" style={{ color: "var(--text-muted)" }}>
+            Загрузка...
+          </div>
+        ) : (
+          <>
+            <div className="flex justify-end">
+              <div className="flex rounded-lg p-0.5" style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}>
+                {(["experience", "proficiency"] as Mode[]).map((m) => (
+                  <button
+                    key={m}
+                    onClick={() => setMode(m)}
+                    className="px-3 py-1 text-xs rounded-md transition-colors"
+                    style={mode === m ? { background: "var(--primary)", color: "#fff" } : { color: "var(--text-muted)" }}
+                  >
+                    {m === "experience" ? "Опыт" : "Владение"}
+                  </button>
+                ))}
               </div>
+            </div>
 
-              {/* Radar */}
-              <div className="rounded-lg p-3" style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}>
-                <CompetencyRadar required={required} ours={ours} mode={mode} />
-              </div>
+            <div className="rounded-lg p-3" style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}>
+              <CompetencyRadar required={required} ours={ours} mode={mode} />
+            </div>
 
-              {/* List grouped by direction */}
+            {/* Collapsible list toggle */}
+            <button
+              onClick={() => setListOpen((v) => !v)}
+              className="w-full flex items-center justify-between px-3 py-2 rounded-md text-xs transition-colors"
+              style={{ background: "var(--bg-card)", border: "1px solid var(--border)", color: "var(--text-muted)" }}
+            >
+              <span className="font-medium" style={{ color: "var(--text)" }}>
+                Детальное сравнение по компетенциям
+              </span>
+              {listOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+            </button>
+
+            {/* Collapsible list */}
+            {listOpen && (
               <div className="space-y-3">
                 {directions.map((dir) => {
                   const items = required.filter((r) => r.direction === dir);
@@ -205,21 +197,20 @@ export function CompetencyPanel({ tenderId, aiScore, onScoreComputed }: Props) {
                     </div>
                   );
                 })}
-              </div>
 
-              {/* Legend */}
-              <div className="flex gap-4 text-xs pt-1" style={{ color: "var(--text-muted)" }}>
-                <span className="flex items-center gap-1.5">
-                  <span style={{ color: REQ_COLOR }}>●</span> Требование тендера
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span style={{ color: OUR_COLOR }}>●</span> Наш профиль
-                </span>
+                <div className="flex gap-4 text-xs pt-1" style={{ color: "var(--text-muted)" }}>
+                  <span className="flex items-center gap-1.5">
+                    <span style={{ color: REQ_COLOR }}>●</span> Требование тендера
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span style={{ color: OUR_COLOR }}>●</span> Наш профиль
+                  </span>
+                </div>
               </div>
-            </>
-          )}
-        </div>
-      )}
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 }
