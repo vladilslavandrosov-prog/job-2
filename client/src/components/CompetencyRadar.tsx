@@ -44,13 +44,13 @@ function CustomTooltip({ active, payload, label }: any) {
     >
       <p className="font-semibold mb-2" style={{ color: "var(--text)" }}>{label}</p>
       {req && (
-        <p style={{ color: "#EF4444" }}>
-          🔴 Требование: <span className="font-medium">{labels[reqVal]}</span>
+        <p style={{ color: REQ_COLOR }}>
+          ● Требование: <span className="font-medium">{labels[reqVal]}</span>
         </p>
       )}
       {our && (
-        <p style={{ color: "#22C55E" }}>
-          🟢 Наша команда: <span className="font-medium">{labels[ourVal]}</span>
+        <p style={{ color: OUR_COLOR }}>
+          ● Наш профиль: <span className="font-medium">{labels[ourVal]}</span>
         </p>
       )}
       {req && our && (
