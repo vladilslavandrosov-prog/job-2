@@ -50,7 +50,6 @@ function proColor(v: number) {
 
 export default function CompetenciesPage() {
   const qc = useQueryClient();
-  const [openDir, setOpenDir] = useState<string>(DIRECTIONS[0]);
 
   const { data: profile = [], isLoading } = useQuery<CompetencyItem[]>({
     queryKey: ["/api/competencies/profile"],
@@ -140,86 +139,58 @@ export default function CompetenciesPage() {
           </button>
         </header>
 
-        <div className="flex flex-1 overflow-hidden">
-          {/* Direction tabs (left) */}
-          <div
-            className="w-52 shrink-0 overflow-y-auto py-3"
-            style={{ borderRight: "1px solid var(--border)" }}
-          >
-            {DIRECTIONS.map((dir) => (
-              <button
-                key={dir}
-                onClick={() => setOpenDir(dir)}
-                className="w-full text-left px-4 py-2.5 text-sm transition-colors flex items-center justify-between"
-                style={
-                  openDir === dir
-                    ? { background: "rgba(99,102,241,0.1)", color: "var(--primary)", fontWeight: 600 }
-                    : { color: "var(--text-muted)" }
-                }
-              >
-                <span className="truncate">{dir}</span>
-                <span
-                  className="text-xs ml-1 shrink-0"
-                  style={{ color: openDir === dir ? "var(--primary)" : "var(--text-muted)" }}
-                >
-                  {dirStats(dir)}
-                </span>
-              </button>
-            ))}
-          </div>
-
-          {/* Competencies list */}
-          <div className="flex-1 overflow-y-auto p-6 pb-24 md:pb-6">
-            {isLoading ? (
-              <div className="flex items-center justify-center h-32" style={{ color: "var(--text-muted)" }}>
-                Загрузка...
-              </div>
-            ) : (
-              <div className="space-y-3 max-w-2xl">
-                <div
-                  className="grid text-xs font-medium px-4 pb-2"
-                  style={{ color: "var(--text-muted)", gridTemplateColumns: "160px 1fr 1fr" }}
-                >
-                  <span>Компетенция</span>
-                  <span>Опыт (годы)</span>
-                  <span>Уровень владения</span>
+        {/* Competencies list — all directions grouped */}
+        <div className="flex-1 overflow-y-auto p-4 md:p-6 pb-24 md:pb-6">
+          {isLoading ? (
+            <div className="flex items-center justify-center h-32" style={{ color: "var(--text-muted)" }}>
+              Загрузка...
+            </div>
+          ) : (
+            <div className="space-y-6 max-w-2xl">
+              {DIRECTIONS.map((dir) => (
+                <div key={dir}>
+                  <div className="flex items-center justify-between mb-3">
+                    <h2 className="text-sm font-semibold" style={{ color: "var(--text)" }}>{dir}</h2>
+                    <span className="text-xs" style={{ color: "var(--text-muted)" }}>{dirStats(dir)}</span>
+                  </div>
+                  <div className="space-y-2">
+                    {COMPETENCY_CATALOG.filter((c) => c.direction === dir).map((cat) => {
+                      const item = getItem(cat.name);
+                      return (
+                        <div
+                          key={cat.name}
+                          className="rounded-lg p-3 md:p-4"
+                          style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}
+                        >
+                          <p className="text-sm font-medium mb-3" style={{ color: "var(--text)" }}>{cat.name}</p>
+                          <div className="grid gap-3" style={{ gridTemplateColumns: "1fr 1fr" }}>
+                            <div>
+                              <p className="text-xs mb-1.5" style={{ color: "var(--text-muted)" }}>Опыт</p>
+                              <LevelSelect
+                                value={item.experienceLevel}
+                                onChange={(v) => update(cat.name, cat.direction, "experienceLevel", v)}
+                                labels={EXPERIENCE_LABELS}
+                                colorFn={expColor}
+                              />
+                            </div>
+                            <div>
+                              <p className="text-xs mb-1.5" style={{ color: "var(--text-muted)" }}>Владение</p>
+                              <LevelSelect
+                                value={item.proficiencyLevel}
+                                onChange={(v) => update(cat.name, cat.direction, "proficiencyLevel", v)}
+                                labels={PROFICIENCY_LABELS}
+                                colorFn={proColor}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
-
-                {COMPETENCY_CATALOG.filter((c) => c.direction === openDir).map((cat) => {
-                  const item = getItem(cat.name);
-                  return (
-                    <div
-                      key={cat.name}
-                      className="rounded-lg p-4"
-                      style={{ background: "var(--bg-card)", border: "1px solid var(--border)" }}
-                    >
-                      <p className="text-sm font-medium mb-3" style={{ color: "var(--text)" }}>{cat.name}</p>
-                      <div className="grid gap-3" style={{ gridTemplateColumns: "1fr 1fr" }}>
-                        <div>
-                          <p className="text-xs mb-1.5" style={{ color: "var(--text-muted)" }}>Опыт</p>
-                          <LevelSelect
-                            value={item.experienceLevel}
-                            onChange={(v) => update(cat.name, cat.direction, "experienceLevel", v)}
-                            labels={EXPERIENCE_LABELS}
-                            colorFn={expColor}
-                          />
-                        </div>
-                        <div>
-                          <p className="text-xs mb-1.5" style={{ color: "var(--text-muted)" }}>Владение</p>
-                          <LevelSelect
-                            value={item.proficiencyLevel}
-                            onChange={(v) => update(cat.name, cat.direction, "proficiencyLevel", v)}
-                            labels={PROFICIENCY_LABELS}
-                            colorFn={proColor}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
